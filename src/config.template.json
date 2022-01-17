@@ -1,0 +1,9 @@
+{
+    "outputDirectory": ".",
+    "feeds": [
+        {
+            "url": "http://mp3s.nashownotes.com/pc20rss.xml",
+            "queue": 1
+        }
+    ]
+}

@@ -8,7 +8,7 @@ open Opml
 open Utils
 open FSharp.Data
 
-let configFilePath = Path.Join(__SOURCE_DIRECTORY__, "config.json")
+let configFilePath = Path.Join(__SOURCE_DIRECTORY__, "config.template.json")
 
 let config = 
     File.ReadAllText(configFilePath)

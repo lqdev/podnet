@@ -2,6 +2,7 @@ module Domain
 
 open System
 open FSharp.Data
+open System.Text.Json.Serialization
 
 type Episode = {
     Title: string
@@ -22,6 +23,7 @@ type Feed = {
 }
 
 type Config = {
-    outputDirectory: string
-    feeds: FeedConfig array
+    [<JsonPropertyName("outputDirectory")>] OutputDirectory: string
+    [<JsonPropertyName("retentionPeriod")>] RetentionPeriod: string
+    [<JsonPropertyName("feeds")>] Feeds: FeedConfig array
 }

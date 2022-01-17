@@ -14,11 +14,11 @@ let config =
     |> fun x -> JsonSerializer.Deserialize<Config>(x)
 
 // Create output directory if it doesn't exist
-Directory.CreateDirectory(config.outputDirectory) |> ignore
+Directory.CreateDirectory(config.OutputDirectory) |> ignore
 
 // Feeds
 let feeds = 
-    config.feeds
+    config.Feeds
     |> Seq.ofArray
     |> Seq.map(getFeed)
 
@@ -26,7 +26,7 @@ let feeds =
 let opml = feeds |> toOmpl |> string
 
 // Save opml
-File.WriteAllText(Path.Join(config.outputDirectory,"feeds.opml"), opml)
+File.WriteAllText(Path.Join(config.OutputDirectory,"feeds.opml"), opml)
 
 // Get all episodes
 let episodes = 
@@ -49,7 +49,7 @@ episodes
     fun f -> 
         f.Episodes 
         |> Seq.map(fun ep ->
-            let saveDirectory = Path.Join(config.outputDirectory,f.FeedName)
+            let saveDirectory = Path.Join(config.OutputDirectory, f.FeedName)
             
             Directory.CreateDirectory(saveDirectory) |> ignore
             

@@ -1,6 +1,6 @@
 # Podnet
 
-.NET CLI Podcast Manager written in F#
+F# console app for downloading and managing podcasts.
 
 ## To-Dos
 

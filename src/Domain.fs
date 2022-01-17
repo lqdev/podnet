@@ -24,6 +24,6 @@ type Feed = {
 
 type Config = {
     [<JsonPropertyName("outputDirectory")>] OutputDirectory: string
-    [<JsonPropertyName("retentionPeriod")>] RetentionPeriod: string
+    [<JsonPropertyName("retentionPeriod")>] RetentionPeriod: int
     [<JsonPropertyName("feeds")>] Feeds: FeedConfig array
 }

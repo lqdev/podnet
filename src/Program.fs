@@ -5,6 +5,7 @@ open System.Text.Json
 open Domain
 open Rss
 open Opml
+open Utils
 open FSharp.Data
 
 let configFilePath = Path.Join(__SOURCE_DIRECTORY__, "config.json")
@@ -44,20 +45,42 @@ let episodes =
 let client = new HttpClient()
 client.Timeout <- TimeSpan.FromMinutes(10)
 
+
 episodes
 |> Seq.collect(
     fun f -> 
-        f.Episodes 
+        let feedEpisodes = f.Episodes  
+        feedEpisodes
         |> Seq.map(fun ep ->
+            // Define directory to save podcats for a specific feed
             let saveDirectory = Path.Join(config.OutputDirectory, f.FeedName)
+
+            // Create directory to save podcats to if it doesn't exist           
+            let di = Directory.CreateDirectory(saveDirectory)
             
-            Directory.CreateDirectory(saveDirectory) |> ignore
+            // Get old podcasts
+            let files = 
+                di.GetFiles()
+                |> Seq.filter(fun x -> 
+                    let filename = Path.GetFileNameWithoutExtension(x.FullName)
+                    let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title)
+                    episodesNames |> Seq.contains(filename)  |> not)
+                |> Array.ofSeq
             
-            // let fileName = Path.Join(saveDirectory, Path.GetFileName(ep.EpisodeUrl.AbsolutePath))
+            // Delete old podcasts (if any)
+            if files.Length > 0 then
+                files 
+                |> Seq.iter(fun x -> 
+                    printfn $"Cleaning up {x.Name}"
+                    x.Delete())
+
+            // Define file name
             let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
             let fileName = Path.Join(saveDirectory, $"{ep.Title}{extension}")
 
+            // Download and save episode
             downloadEpisodeAsync client fileName ep.EpisodeUrl))
 |> Async.Parallel
 |> Async.Ignore
 |> Async.RunSynchronously
+

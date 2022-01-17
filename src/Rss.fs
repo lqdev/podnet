@@ -45,10 +45,7 @@ let downloadEpisodeAsync (client:HttpClient) (filePath:string) (url:Uri) =
         match File.Exists(filePath) with 
         | true -> ignore |> ignore
         | false ->
-            
-            // use client = new HttpClient()
-            // client.Timeout <- TimeSpan.FromMinutes(3)
-            
+                        
             printfn $"Downloading {filePath}"
 
             let! audioStream = client.GetByteArrayAsync(url) |> Async.AwaitTask

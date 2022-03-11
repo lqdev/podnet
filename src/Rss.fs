@@ -28,7 +28,7 @@ let getEpisodes (feed:Feed) =
     feed.Content.Descendants("item")
     |> Seq.map(fun i -> 
         let title = getInnerValue i "title" 
-        let pubDate = getInnerValue i "pubDate" |> DateTime.Parse
+        // let pubDate = getInnerValue i "pubDate" |> DateTime.Parse
 
         let mediaLink = 
             i.Elements("enclosure")
@@ -37,11 +37,15 @@ let getEpisodes (feed:Feed) =
                 |> Option.map(fun x -> x.Value()))
             |> Seq.head
 
-        { Title=title; PubDate = pubDate; EpisodeUrl = new Uri(mediaLink)})
-    |> Seq.sortByDescending(fun episode -> episode.PubDate)
+        { Title=title; PubDate = DateTime.Now; EpisodeUrl = new Uri(mediaLink)})
+    // |> Seq.sortByDescending(fun episode -> episode.PubDate)
 
-let downloadEpisodeAsync (client:HttpClient) (filePath:string) (url:Uri) = 
+let downloadEpisodeAsync (filePath:string) (url:Uri) = 
     async {
+        let userAgent = Headers.ProductInfoHeaderValue("dotnet", "Podnet")
+        use client = new HttpClient()
+        client.Timeout <- TimeSpan.FromMinutes(20)
+        client.DefaultRequestHeaders.UserAgent.Add(userAgent)
         match File.Exists(filePath) with 
         | true -> ignore |> ignore
         | false ->

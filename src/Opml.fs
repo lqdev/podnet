@@ -23,3 +23,6 @@ let toOmpl (configFeed:Feed seq) =
     feedOpml.Descendants(XName.Get "body").First().Add(outlines)
 
     feedOpml
+
+let fromOpml (path: string) = 
+    failwith $"Implement OPML import"

@@ -42,9 +42,6 @@ let episodes =
             Episodes = episodes |})     
 
 // Download episodes
-let client = new HttpClient()
-client.Timeout <- TimeSpan.FromMinutes(10)
-
 
 episodes
 |> Seq.collect(
@@ -79,8 +76,8 @@ episodes
             let fileName = Path.Join(saveDirectory, $"{ep.Title}{extension}")
 
             // Download and save episode
-            downloadEpisodeAsync client fileName ep.EpisodeUrl))
-|> Async.Parallel
+            downloadEpisodeAsync fileName ep.EpisodeUrl))
+|> Async.Sequential
 |> Async.Ignore
 |> Async.RunSynchronously
 

@@ -8,76 +8,81 @@ open Opml
 open Utils
 open FSharp.Data
 
-let configFilePath = Path.Join(__SOURCE_DIRECTORY__, "config.template.json")
+[<EntryPoint>]
+let main args = 
+    let configFile = args[0]
 
-let config = 
-    File.ReadAllText(configFilePath)
-    |> fun x -> JsonSerializer.Deserialize<Config>(x)
+    let configFilePath = Path.Join(__SOURCE_DIRECTORY__, configFile)
 
-// Create output directory if it doesn't exist
-Directory.CreateDirectory(config.OutputDirectory) |> ignore
+    let config = 
+        File.ReadAllText(configFilePath)
+        |> fun x -> JsonSerializer.Deserialize<Config>(x)
 
-// Feeds
-let feeds = 
-    config.Feeds
-    |> Seq.ofArray
-    |> Seq.map(getFeed)
+    // Create output directory if it doesn't exist
+    Directory.CreateDirectory(config.OutputDirectory) |> ignore
 
-// Convert feeds to OPML
-let opml = feeds |> toOmpl |> string
+    // Feeds
+    let feeds = 
+        config.Feeds
+        |> Seq.ofArray
+        |> Seq.map(getFeed)
 
-// Save opml
-File.WriteAllText(Path.Join(config.OutputDirectory,"feeds.opml"), opml)
+    // Convert feeds to OPML
+    let opml = feeds |> toOmpl |> string
 
-// Get all episodes
-let episodes = 
-    feeds
-    |> Seq.map(fun x -> 
+    // Save opml
+    File.WriteAllText(Path.Join(config.OutputDirectory,"feeds.opml"), opml)
 
-        let episodes =
-            x |> getEpisodes |> Seq.take x.Queue 
-        
-        {|
-            FeedName= x.Name
-            Episodes = episodes |})     
+    // Get all episodes
+    let episodes = 
+        feeds
+        |> Seq.map(fun x -> 
 
-// Download episodes
-
-episodes
-|> Seq.collect(
-    fun f -> 
-        let feedEpisodes = f.Episodes  
-        feedEpisodes
-        |> Seq.map(fun ep ->
-            // Define directory to save podcats for a specific feed
-            let saveDirectory = Path.Join(config.OutputDirectory, f.FeedName)
-
-            // Create directory to save podcats to if it doesn't exist           
-            let di = Directory.CreateDirectory(saveDirectory)
+            let episodes =
+                x |> getEpisodes |> Seq.take x.Queue 
             
-            // Get old podcasts
-            let files = 
-                di.GetFiles()
-                |> Seq.filter(fun x -> 
-                    let filename = Path.GetFileNameWithoutExtension(x.FullName)
-                    let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title)
-                    episodesNames |> Seq.contains(filename)  |> not)
-                |> Array.ofSeq
-            
-            // Delete old podcasts (if any)
-            if files.Length > 0 then
-                files 
-                |> Seq.iter(fun x -> 
-                    printfn $"Cleaning up {x.Name}"
-                    x.Delete())
+            {|
+                FeedName= x.Name
+                Episodes = episodes |})     
 
-            // Define file name
-            let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
-            let fileName = Path.Join(saveDirectory, $"{ep.Title}{extension}")
+    // Download episodes
 
-            // Download and save episode
-            downloadEpisodeAsync fileName ep.EpisodeUrl))
-|> Async.Sequential
-|> Async.Ignore
-|> Async.RunSynchronously
+    episodes
+    |> Seq.collect(
+        fun f -> 
+            let feedEpisodes = f.Episodes  
+            feedEpisodes
+            |> Seq.map(fun ep ->
+                // Define directory to save podcats for a specific feed
+                let saveDirectory = Path.Join(config.OutputDirectory, f.FeedName)
 
+                // Create directory to save podcats to if it doesn't exist           
+                let di = Directory.CreateDirectory(saveDirectory)
+                
+                // Get old podcasts
+                let files = 
+                    di.GetFiles()
+                    |> Seq.filter(fun x -> 
+                        let filename = Path.GetFileNameWithoutExtension(x.FullName)
+                        let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title)
+                        episodesNames |> Seq.contains(filename)  |> not)
+                    |> Array.ofSeq
+                
+                // Delete old podcasts (if any)
+                if files.Length > 0 then
+                    files 
+                    |> Seq.iter(fun x -> 
+                        printfn $"Cleaning up {x.Name}"
+                        x.Delete())
+
+                // Define file name
+                let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
+                let fileName = Path.Join(saveDirectory, $"{ep.Title}{extension}")
+
+                // Download and save episode
+                downloadEpisodeAsync fileName ep.EpisodeUrl))
+    |> Async.Sequential
+    |> Async.Ignore
+    |> Async.RunSynchronously
+
+    0

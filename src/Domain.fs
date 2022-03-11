@@ -3,6 +3,15 @@ module Domain
 open System
 open FSharp.Data
 open System.Text.Json.Serialization
+open Argu
+
+type CliArguments = 
+    | Config_File of path:string
+
+    interface IArgParserTemplate with
+        member s.Usage =
+            match s with
+            | Config_File _ -> "Specify a JSON config file"
 
 type Episode = {
     Title: string

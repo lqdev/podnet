@@ -6,11 +6,17 @@ open Domain
 open Rss
 open Opml
 open Utils
+open Argu
 open FSharp.Data
 
 [<EntryPoint>]
 let main args = 
-    let configFile = args[0]
+
+    let parser = ArgumentParser.Create<CliArguments>(programName = "podnet")
+
+    let parserResults = parser.Parse args
+
+    let configFile = parserResults.GetResult Config_File
 
     let configFilePath = Path.Join(__SOURCE_DIRECTORY__, configFile)
 

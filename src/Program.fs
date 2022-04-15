@@ -66,6 +66,9 @@ let main args =
                 let di = Directory.CreateDirectory(saveDirectory)
                 
                 // Get old podcasts
+
+
+
                 let files = 
                     di.GetFiles()
                     |> Seq.filter(fun x -> 
@@ -73,9 +76,11 @@ let main args =
                         let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title)
                         episodesNames |> Seq.contains(filename)  |> not)
                     |> Array.ofSeq
-                
+
+                let numberOfEpisodes = feedEpisodes |> Seq.length
+
                 // Delete old podcasts (if any)
-                if files.Length > 0 then
+                if files.Length > numberOfEpisodes then
                     files 
                     |> Seq.iter(fun x -> 
                         printfn $"Cleaning up {x.Name}"
@@ -83,7 +88,10 @@ let main args =
 
                 // Define file name
                 let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
-                let fileName = Path.Join(saveDirectory, $"{ep.Title}{extension}")
+                let invalidChars = Path.GetInvalidFileNameChars()
+                let sanitizedName = String.Join("_", ep.Title.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
+
+                let fileName = Path.Join(saveDirectory, $"{sanitizedName}{extension}")
 
                 // Download and save episode
                 downloadEpisodeAsync fileName ep.EpisodeUrl))

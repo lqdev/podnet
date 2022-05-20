@@ -1,5 +1,6 @@
 module Utils
 
+open System
 open System.IO
 
 // Get directories
@@ -18,3 +19,11 @@ let deleteFiles (dir:DirectoryInfo) =
         files
         |> Array.tail
         |> Array.iter(fun file -> file.Delete())
+
+let sanitizeString (s:string) = 
+    let invalidChars = 
+        [|'!';':';' ';';';'#';''';'-';'/';',';'(';')';'|';'?'; '.'|]
+        |> Array.append(Path.GetInvalidFileNameChars())
+        |> Array.append (Path.GetInvalidPathChars())
+    
+    String.Join('_',s.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))

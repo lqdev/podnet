@@ -457,4 +457,7 @@ $RECYCLE.BIN/
 ## Podnet
 ##
 podcasts/**/*
+src/podcasts/**/*
 src/config.json
+src/podnet.json
+*.fsx

@@ -52,7 +52,9 @@ let downloadEpisodeAsync (filePath:string) (url:Uri) =
                         
             printfn $"Downloading {filePath}"
 
-            let! audioStream = client.GetByteArrayAsync(url) |> Async.AwaitTask
+            let! audioStream = 
+                client.GetByteArrayAsync(url)
+                |> Async.AwaitTask
 
             printfn $"{filePath} download complete"
 

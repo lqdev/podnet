@@ -60,20 +60,23 @@ let main args =
             feedEpisodes
             |> Seq.map(fun ep ->
                 // Define directory to save podcats for a specific feed
-                let saveDirectory = Path.Join(config.OutputDirectory, f.FeedName)
+
+                let sanitizedFeedName = 
+                    f.FeedName |> sanitizeString
+                    // String.Join('_', f.FeedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
+                let saveDirectory = Path.Join(config.OutputDirectory, sanitizedFeedName)
 
                 // Create directory to save podcats to if it doesn't exist           
                 let di = Directory.CreateDirectory(saveDirectory)
                 
                 // Get old podcasts
-
-
-
                 let files = 
                     di.GetFiles()
                     |> Seq.filter(fun x -> 
-                        let filename = Path.GetFileNameWithoutExtension(x.FullName)
-                        let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title)
+                        let filename = 
+                            Path.GetFileNameWithoutExtension(x.FullName)
+                            |> sanitizeString
+                        let episodesNames = feedEpisodes |> Seq.map(fun c -> c.Title |> sanitizeString)
                         episodesNames |> Seq.contains(filename)  |> not)
                     |> Array.ofSeq
 
@@ -88,8 +91,9 @@ let main args =
 
                 // Define file name
                 let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
-                let invalidChars = Path.GetInvalidFileNameChars()
-                let sanitizedName = String.Join("_", ep.Title.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
+                let sanitizedName = 
+                    ep.Title |> sanitizeString
+                    // String.Join("_", ep.Title.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
 
                 let fileName = Path.Join(saveDirectory, $"{sanitizedName}{extension}")
 

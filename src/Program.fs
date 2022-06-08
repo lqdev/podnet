@@ -63,7 +63,7 @@ let main args =
 
                 let sanitizedFeedName = 
                     f.FeedName |> sanitizeString
-                    // String.Join('_', f.FeedName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
+
                 let saveDirectory = Path.Join(config.OutputDirectory, sanitizedFeedName)
 
                 // Create directory to save podcats to if it doesn't exist           
@@ -71,7 +71,9 @@ let main args =
                 
                 // Get old podcasts
                 let files = 
-                    di.GetFiles()
+                    di.EnumerateFiles()
+                    |> Seq.filter(fun x -> 
+                        Path.GetFileNameWithoutExtension(x.FullName).StartsWith("2x") |> not)
                     |> Seq.filter(fun x -> 
                         let filename = 
                             Path.GetFileNameWithoutExtension(x.FullName)
@@ -93,7 +95,6 @@ let main args =
                 let extension = Path.GetExtension(ep.EpisodeUrl.AbsolutePath)
                 let sanitizedName = 
                     ep.Title |> sanitizeString
-                    // String.Join("_", ep.Title.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
 
                 let fileName = Path.Join(saveDirectory, $"{sanitizedName}{extension}")
 
